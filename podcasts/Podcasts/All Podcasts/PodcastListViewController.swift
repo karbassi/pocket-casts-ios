@@ -384,7 +384,9 @@ class PodcastListViewController: PCViewController, ShareListDelegate {
             guard let strongSelf = self else { return }
 
             let oldData = strongSelf.gridItems
-            var newData = HomeGridDataHelper.gridListItems(orderedBy: Settings.homeFolderSortOrder, badgeType: Settings.podcastBadgeType)
+            // show everything while reordering, so saving the custom order includes hidden items
+            let hideFullyPlayed = Settings.hideFullyPlayedPodcasts && !strongSelf.isEditingOrder
+            var newData = HomeGridDataHelper.gridListItems(orderedBy: Settings.homeFolderSortOrder, badgeType: Settings.podcastBadgeType, hideFullyPlayed: hideFullyPlayed)
 
             if newData.isEmpty {
                 newData = [HomeGridListItem.empty]
@@ -453,6 +455,12 @@ class PodcastListViewController: PCViewController, ShareListDelegate {
         }
         badgesAction.submenu = { [weak self] in self?.makeBadgeOptionsPicker() }
         optionsPicker.addAction(action: badgesAction)
+
+        let hideFullyPlayedAction = OptionAction(label: L10n.podcastsHideFullyPlayed, icon: "episode-archive", selected: Settings.hideFullyPlayedPodcasts, onOffAction: true) { [weak self] in
+            Settings.hideFullyPlayedPodcasts.toggle()
+            self?.refreshGridItems()
+        }
+        optionsPicker.addAction(action: hideFullyPlayedAction)
 
         let shareAction = OptionAction(label: L10n.podcastsShare, icon: "podcast-share") {
             let shareController = SharePodcastsViewController()

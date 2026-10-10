@@ -2094,6 +2094,9 @@
 /* Title for the options to configure badge display options. */
 "podcasts_badges" = "Badges";
 
+/* Title for the toggle in the Podcasts options menu that hides podcasts and folders with no unfinished episodes. */
+"podcasts_hide_fully_played" = "Hide Fully Played";
+
 /* Prompt to enter the mode for reordering the podcasts grid. */
 "podcasts_edit" = "Edit Podcasts";
 

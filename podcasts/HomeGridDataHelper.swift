@@ -13,7 +13,7 @@ class HomeGridDataHelper {
     }
 
     #if !os(watchOS)
-        class func gridListItems(orderedBy: LibrarySort, badgeType: BadgeType) -> [HomeGridListItem] {
+        class func gridListItems(orderedBy: LibrarySort, badgeType: BadgeType, hideFullyPlayed: Bool = false) -> [HomeGridListItem] {
             let allPodcasts: [Podcast]
             switch orderedBy {
             case .episodeDateNewestToOldest:
@@ -26,9 +26,10 @@ class HomeGridDataHelper {
 
             let gridItems: [HomeGridListItem] = gridItems(orderedBy: orderedBy, sortedPodcasts: allPodcasts).map { HomeGridListItem(gridItem: $0, badgeType: badgeType, theme: Theme.shared.activeTheme) }
 
+            let podcastCounts = (badgeType == .allUnplayed || hideFullyPlayed) ? DataManager.shared.podcastUnfinishedCounts() : [:]
+
             // load the required badge information if the supplied badge type needs it
             if badgeType == .allUnplayed {
-                let podcastCounts = DataManager.shared.podcastUnfinishedCounts()
                 for gridItem in gridItems {
                     if let podcast = gridItem.podcast {
                         podcast.cachedUnreadCount = Int(podcastCounts[podcast.uuid] ?? 0)
@@ -65,6 +66,18 @@ class HomeGridDataHelper {
                         folder.cachedUnreadCount = shouldShowUnplayedBadge ? 1 : 0
                         gridItem.frozenBadgeCount = folder.cachedUnreadCount
                     }
+                }
+            }
+
+            if hideFullyPlayed {
+                return gridItems.filter { gridItem in
+                    if let podcast = gridItem.podcast {
+                        return podcastCounts[podcast.uuid, default: 0] > 0
+                    } else if let folder = gridItem.folder {
+                        // keep a folder if any podcast inside it still has unfinished episodes
+                        return allPodcasts.contains { $0.folderUuid == folder.uuid && podcastCounts[$0.uuid, default: 0] > 0 }
+                    }
+                    return true
                 }
             }
 

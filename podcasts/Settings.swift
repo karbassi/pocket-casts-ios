@@ -75,6 +75,18 @@ class Settings: NSObject {
         }
     }
 
+    // MARK: - Hide Fully Played Podcasts
+
+    private static let hideFullyPlayedPodcastsKey = "SJHideFullyPlayedPodcasts"
+    static var hideFullyPlayedPodcasts: Bool {
+        get {
+            UserDefaults.standard.bool(forKey: Settings.hideFullyPlayedPodcastsKey)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Settings.hideFullyPlayedPodcastsKey)
+        }
+    }
+
     // MARK: - Up Next Auto Download
 
     private static let autoDownloadUpNext = "SJAutoDownloadUpNext"

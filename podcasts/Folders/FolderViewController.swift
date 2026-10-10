@@ -232,13 +232,20 @@ class FolderViewController: PCViewController {
     }
 
     // TODO: change this to be diff based and see if we can use the new iOS diffable stuff
-    private func reloadPodcasts() {
+    func reloadPodcasts() {
         podcasts = DataManager.shared.allPodcastsInFolder(folder: folder)
 
         let badgeType = Settings.podcastBadgeType
+        // show everything while reordering, so saving the custom order includes hidden podcasts
+        let hideFullyPlayed = Settings.hideFullyPlayedPodcasts && !isEditingOrder
+        let podcastCounts = (badgeType == .allUnplayed || hideFullyPlayed) ? DataManager.shared.podcastUnfinishedCounts() : [:]
+
+        if hideFullyPlayed {
+            podcasts = podcasts.filter { podcastCounts[$0.uuid, default: 0] > 0 }
+        }
+
         // load the required badge information if the supplied badge type needs it
         if badgeType == .allUnplayed {
-            let podcastCounts = DataManager.shared.podcastUnfinishedCounts()
             for podcast in podcasts {
                 podcast.cachedUnreadCount = Int(podcastCounts[podcast.uuid] ?? 0)
             }

@@ -45,6 +45,10 @@ extension PodcastListViewController {
         for cell in podcastsCollectionView.visibleCells {
             applyEditingTreatment(to: cell)
         }
+
+        if Settings.hideFullyPlayedPodcasts {
+            refreshGridItems()
+        }
     }
 
     private func exitEditMode() {
@@ -57,6 +61,10 @@ extension PodcastListViewController {
 
         for cell in podcastsCollectionView.visibleCells {
             removeEditingTreatment(from: cell)
+        }
+
+        if Settings.hideFullyPlayedPodcasts {
+            refreshGridItems()
         }
     }
 

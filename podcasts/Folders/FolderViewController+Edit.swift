@@ -47,6 +47,10 @@ extension FolderViewController {
         for cell in mainGrid.visibleCells {
             applyEditingTreatment(to: cell)
         }
+
+        if Settings.hideFullyPlayedPodcasts {
+            reloadPodcasts()
+        }
     }
 
     private func exitEditMode() {
@@ -59,6 +63,10 @@ extension FolderViewController {
 
         for cell in mainGrid.visibleCells {
             removeEditingTreatment(from: cell)
+        }
+
+        if Settings.hideFullyPlayedPodcasts {
+            reloadPodcasts()
         }
     }
 

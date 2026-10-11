@@ -24,9 +24,14 @@ class HomeGridDataHelper {
                 allPodcasts = DataManager.shared.allPodcasts(includeUnsubscribed: false)
             }
 
-            let gridItems: [HomeGridListItem] = gridItems(orderedBy: orderedBy, sortedPodcasts: allPodcasts).map { HomeGridListItem(gridItem: $0, badgeType: badgeType, theme: Theme.shared.activeTheme) }
-
             let podcastCounts = (badgeType == .allUnplayed || hideFullyPlayed) ? DataManager.shared.podcastUnfinishedCounts() : [:]
+
+            var homeGridItems = gridItems(orderedBy: orderedBy, sortedPodcasts: allPodcasts)
+            if hideFullyPlayed {
+                homeGridItems = itemsWithUnfinishedEpisodes(homeGridItems, allPodcasts: allPodcasts, unfinishedCounts: podcastCounts)
+            }
+
+            let gridItems: [HomeGridListItem] = homeGridItems.map { HomeGridListItem(gridItem: $0, badgeType: badgeType, theme: Theme.shared.activeTheme) }
 
             // load the required badge information if the supplied badge type needs it
             if badgeType == .allUnplayed {
@@ -69,21 +74,21 @@ class HomeGridDataHelper {
                 }
             }
 
-            if hideFullyPlayed {
-                return gridItems.filter { gridItem in
-                    if let podcast = gridItem.podcast {
-                        return podcastCounts[podcast.uuid, default: 0] > 0
-                    } else if let folder = gridItem.folder {
-                        // keep a folder if any podcast inside it still has unfinished episodes
-                        return allPodcasts.contains { $0.folderUuid == folder.uuid && podcastCounts[$0.uuid, default: 0] > 0 }
-                    }
-                    return true
-                }
-            }
-
             return gridItems
         }
     #endif
+
+    // Removes podcasts without unfinished episodes, and folders where none of the podcasts inside have any
+    class func itemsWithUnfinishedEpisodes(_ items: [HomeGridItem], allPodcasts: [Podcast], unfinishedCounts: [String: Int32]) -> [HomeGridItem] {
+        items.filter { item in
+            if let podcast = item.podcast {
+                return unfinishedCounts[podcast.uuid, default: 0] > 0
+            } else if let folder = item.folder {
+                return allPodcasts.contains { $0.folderUuid == folder.uuid && unfinishedCounts[$0.uuid, default: 0] > 0 }
+            }
+            return true
+        }
+    }
 
     class func gridItems(orderedBy: LibrarySort) -> [HomeGridItem] {
         let allPodcasts: [Podcast]

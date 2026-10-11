@@ -459,6 +459,8 @@ class PodcastListViewController: PCViewController, ShareListDelegate {
         let hideFullyPlayedAction = OptionAction(label: L10n.podcastsHideFullyPlayed, icon: "episode-archive", selected: Settings.hideFullyPlayedPodcasts, onOffAction: true) { [weak self] in
             Settings.hideFullyPlayedPodcasts.toggle()
             self?.refreshGridItems()
+            Analytics.track(.podcastsListModalOptionTapped, properties: ["option": "hide_fully_played"])
+            Settings.trackValueToggled(.podcastsListHideFullyPlayedToggled, enabled: Settings.hideFullyPlayedPodcasts)
         }
         optionsPicker.addAction(action: hideFullyPlayedAction)
 
